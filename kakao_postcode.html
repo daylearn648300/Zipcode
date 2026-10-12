@@ -2,31 +2,35 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <title>Daum 우편번호 검색</title>
+    <!-- 카카오/Daum 우편번호 API 스크립트 -->
     <script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
         window.onload = function(){
             new daum.Postcode({
                 oncomplete: function(data) {
+                    // 1. 우편번호와 주소 데이터 추출
                     var zonecode = data.zonecode; // 우편번호
-                    var fullAddr = data.roadAddress; // 도로명 주소
+                    var fullAddr = data.roadAddress; // 도로명 주소 (필요시 지번은 data.jibunAddress)
 
-                    // 만약 엑세스 VBA 혹은 폼과 연동하는 경우:
-                    // 부모창이나 특정 프로토콜로 값을 전달하거나, 
-                    // 로컬 서버 API로 전송 후 엑세스가 폴링(Polling)하는 방식을 사용할 수 있습니다.
+                    // 2. Access VBA가 읽어갈 수 있도록 HTML 내 input 엘리먼트에 값 입력
+                    document.getElementById("vba_zonecode").value = zonecode;
+                    document.getElementById("vba_address").value = fullAddr;
                     
-                    // 예시: 부모 윈도우가 존재할 경우 postMessage 전달
-                    if (window.parent != window) {
-                        window.parent.postMessage({
-                            zonecode: zonecode,
-                            address: fullAddr
-                        }, '*');
-                    }
+                    // 3. 완료 플래그를 'Y'로 변경하여 Access 타이머가 인지하도록 함
+                    document.getElementById("vba_complete").value = "Y";
                 }
             }).embed(document.getElementById('postcodeWrap'));
         }
     </script>
 </head>
 <body style="margin:0;padding:0;">
+    <!-- Access VBA 폼 타이머가 실시간으로 감시하고 값을 가져갈 히든 필드 -->
+    <input type="hidden" id="vba_complete" value="N">
+    <input type="hidden" id="vba_zonecode" value="">
+    <input type="hidden" id="vba_address" value="">
+
+    <!-- 우편번호 서비스가 삽입될 영역 -->
     <div id="postcodeWrap" style="width:100%;height:100vh;"></div>
 </body>
 </html>
