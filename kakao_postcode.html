@@ -1,33 +1,33 @@
+html
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>주소검색</title>
-    <!-- 카카오 우편번호 스크립트 로드 -->
-    <script src="https://daumcdn.net"></script>
-</head>
-<body>
-    <div id="wrap" style="width:100%; height:100%; min-height:500px;"></div>
-
+    <meta charset="utf-8">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
-        var element_wrap = document.getElementById('wrap');
+        window.onload = function(){
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var zonecode = data.zonecode; // 우편번호
+                    var fullAddr = data.roadAddress; // 도로명 주소
 
-        new daum.Postcode({
-            oncomplete: function(data) {
-                // 사용자가 주소를 선택했을 때 Access VBA가 읽을 수 있도록 document.title에 값을 주입
-                // 형식: 우편번호 || 도로명주소(또는 지번주소)
-                var fullAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-                document.title = data.zonecode + "||" + fullAddr;
-            },
-            onclose: function(state) {
-                // 창이 닫히거나 완료되었을 때 알림용 타이틀 변경
-                if(document.title.indexOf("||") === -1) {
-                    document.title = "CLOSED";
+                    // 만약 엑세스 VBA 혹은 폼과 연동하는 경우:
+                    // 부모창이나 특정 프로토콜로 값을 전달하거나, 
+                    // 로컬 서버 API로 전송 후 엑세스가 폴링(Polling)하는 방식을 사용할 수 있습니다.
+                    
+                    // 예시: 부모 윈도우가 존재할 경우 postMessage 전달
+                    if (window.parent != window) {
+                        window.parent.postMessage({
+                            zonecode: zonecode,
+                            address: fullAddr
+                        }, '*');
+                    }
                 }
-            },
-            width : '100%',
-            height : '100%'
-        }).embed(element_wrap);
+            }).embed(document.getElementById('postcodeWrap'));
+        }
     </script>
+</head>
+<body style="margin:0;padding:0;">
+    <div id="postcodeWrap" style="width:100%;height:100vh;"></div>
 </body>
 </html>
